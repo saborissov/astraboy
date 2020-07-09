@@ -12,10 +12,19 @@ import GameplayKit
 class GameScene: SKScene, SKPhysicsContactDelegate {
     var astraboy = SKSpriteNode()
     var bg = SKSpriteNode()
+    var score = 0
+    
+    var scoreLabel = SKLabelNode()
+    var gameOverLabel = SKLabelNode()
+    var gameOverLabel2 = SKLabelNode()
+    
+    var timer = Timer()
+    
     
     enum ColliderType:UInt32 {
         case Astraboy = 1
         case Object = 2
+        case Gap = 4
     }
     
     var gameOver = false
@@ -43,6 +52,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         pipe1.physicsBody!.contactTestBitMask = ColliderType.Object.rawValue
         pipe1.physicsBody!.categoryBitMask = ColliderType.Object.rawValue
         pipe1.physicsBody!.collisionBitMask = ColliderType.Object.rawValue
+        pipe1.zPosition = -1
         
         self.addChild(pipe1)
         
@@ -58,22 +68,85 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         pipe2.physicsBody!.contactTestBitMask = ColliderType.Object.rawValue
         pipe2.physicsBody!.categoryBitMask = ColliderType.Object.rawValue
         pipe2.physicsBody!.collisionBitMask = ColliderType.Object.rawValue
+        pipe2.zPosition = -1
         
         self.addChild(pipe2)
+        
+        let gap = SKNode()
+        gap.position = CGPoint(x: self.frame.midX + self.frame.width, y: self.frame.midY + pipeOfset)
+        gap.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: pipeTexture.size().width, height: gapHight))
+        gap.physicsBody!.isDynamic = false
+        gap.run(movePipes)
+        
+        gap.physicsBody!.contactTestBitMask = ColliderType.Astraboy.rawValue
+        gap.physicsBody!.categoryBitMask = ColliderType.Gap.rawValue
+        gap.physicsBody!.collisionBitMask = ColliderType.Gap.rawValue
+        
+        self.addChild(gap)
+        
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
-       
-        print("Есть контакт")
-        self.speed = 0
-        gameOver = true
-        print("Конец игры")
+        
+        if gameOver == false {
+        
+        if contact.bodyA.categoryBitMask == ColliderType.Gap.rawValue || contact.bodyB.categoryBitMask == ColliderType.Gap.rawValue{
+            print("Зачет одно очко!")
+            score += 1
+            
+            scoreLabel.text = String(score)
+            
+            
+            if scoreLabel.text == "10" || scoreLabel.text == "20"{
+                
+//                scoreLabel.fontColor = UIColor.purple
+//                scoreLabel.fontSize = 55
+                scoreLabel.text = "Молодчина!"
+                
+                
+            }
+            
+            
+        }
+            
+            
+            
+        else{
+            self.speed = 0
+            gameOver = true
+            timer.invalidate()
+            gameOverLabel.fontName = "Helvetica"
+            gameOverLabel.fontColor = UIColor.purple
+            gameOverLabel2.fontName = "Helvetica"
+            gameOverLabel2.fontColor = UIColor.purple
+            gameOverLabel.fontSize = 40
+            gameOverLabel2.fontSize = 20
+            gameOverLabel.text = "Конец игры!"
+            gameOverLabel2.text = "Нажми для продолжения"
+            gameOverLabel.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
+            gameOverLabel2.position = CGPoint(x: self.frame.midX, y: self.frame.height / 2 - 150)
+            self.addChild(gameOverLabel)
+            self.addChild(gameOverLabel2)
+            
+            
+            }
+            
+        }
+        
     }
     
     override func didMove(to view: SKView) {
-        self.physicsWorld.contactDelegate = self
         
-        _ = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(makePipes), userInfo: nil, repeats: true)
+        self.physicsWorld.contactDelegate = self
+        setupGame()
+        
+        
+        
+    }
+    
+    func setupGame() {
+        
+        timer = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(makePipes), userInfo: nil, repeats: true)
         
         let bgTexture = SKTexture(imageNamed: "bg")
         let moveBGAnimation = SKAction.move(by: CGVector (dx: -bgTexture.size().width, dy: 0 ), duration: 5)
@@ -90,7 +163,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             bg.size.height = self.frame.height
             bg.run(moveBGForever)
-            bg.zPosition = -1
+            bg.zPosition = -2
             self.addChild(bg)
             i += 1
             
@@ -107,7 +180,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         astraboy.run(makeAstraboyFly)
         
-      
+        
         astraboy.physicsBody = SKPhysicsBody(circleOfRadius: astraBoyTexture.size().height / 2)
         astraboy.physicsBody!.isDynamic = false
         
@@ -132,6 +205,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         self.addChild(ground)
         
+        scoreLabel.fontName = "Helvetica"
+        scoreLabel.fontSize = 50
+        scoreLabel.text = "0"
+        scoreLabel.position = CGPoint(x: self.frame.midX, y: self.frame.height / 2 - 70)
+        
+        self.addChild(scoreLabel)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -139,12 +218,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if gameOver == false {
             
             astraboy.physicsBody!.isDynamic = true
-//        let astraBoyTexture = SKTexture(imageNamed: "astraboy")
-//        astraboy.physicsBody = SKPhysicsBody(circleOfRadius: astraBoyTexture.size().height / 2)
-        //Смещение объекта по оси x/y
+            //        let astraBoyTexture = SKTexture(imageNamed: "astraboy")
+            //        astraboy.physicsBody = SKPhysicsBody(circleOfRadius: astraBoyTexture.size().height / 2)
+            //Смещение объекта по оси x/y
             astraboy.physicsBody!.velocity = CGVector(dx: 1, dy: -1)
-            astraboy.physicsBody!.applyImpulse(CGVector(dx: 0, dy: 60))
+            //Уровень сложности - смещение по оси y
+            astraboy.physicsBody!.applyImpulse(CGVector(dx: 0, dy: 50))
             
+        } else{
+            gameOver = false
+            score = 0
+            self.speed = 1
+            self.removeAllChildren()
+            setupGame()
         }
         
     }
