@@ -9,81 +9,151 @@
 import SpriteKit
 import GameplayKit
 
-class GameScene: SKScene {
+class GameScene: SKScene, SKPhysicsContactDelegate {
+    var astraboy = SKSpriteNode()
+    var bg = SKSpriteNode()
     
-    private var label : SKLabelNode?
-    private var spinnyNode : SKShapeNode?
+    enum ColliderType:UInt32 {
+        case Astraboy = 1
+        case Object = 2
+    }
+    
+    var gameOver = false
+    
+    
+    @objc func makePipes() {
+        
+        let movePipes = SKAction.move(by: CGVector(dx: -2 * self.frame.width, dy: 0), duration: TimeInterval (self.frame.width / 100))
+        let astraBoyTexture = SKTexture(imageNamed: "astraboy")
+        //расстояние между труб
+        let gapHight = astraBoyTexture.size().height * 3
+        
+        let movementMount = arc4random() % UInt32(self.frame.height / 2)
+        
+        let pipeOfset = CGFloat(movementMount) - self.frame.height / 4
+        
+        let pipeTexture = SKTexture(imageNamed: "pipe1")
+        let pipe1 = SKSpriteNode(texture: pipeTexture)
+        pipe1.position = CGPoint(x: self.frame.midX + self.frame.width, y: self.frame.midY + pipeTexture.size().height / 2 + gapHight / 2 + pipeOfset)
+        pipe1.run(movePipes)
+        
+        pipe1.physicsBody = SKPhysicsBody(rectangleOf: pipeTexture.size())
+        pipe1.physicsBody!.isDynamic = false
+        
+        pipe1.physicsBody!.contactTestBitMask = ColliderType.Object.rawValue
+        pipe1.physicsBody!.categoryBitMask = ColliderType.Object.rawValue
+        pipe1.physicsBody!.collisionBitMask = ColliderType.Object.rawValue
+        
+        self.addChild(pipe1)
+        
+        let pipe2Texture = SKTexture(imageNamed: "pipe2")
+        let pipe2 = SKSpriteNode(texture: pipe2Texture)
+        pipe2.position = CGPoint(x: self.frame.midX + self.frame.width, y: self.frame.midY - pipe2Texture.size().height / 2 - gapHight/2 + pipeOfset)
+        
+        pipe2.run(movePipes)
+        
+        pipe2.physicsBody = SKPhysicsBody(rectangleOf: pipeTexture.size())
+        pipe2.physicsBody!.isDynamic = false
+        
+        pipe2.physicsBody!.contactTestBitMask = ColliderType.Object.rawValue
+        pipe2.physicsBody!.categoryBitMask = ColliderType.Object.rawValue
+        pipe2.physicsBody!.collisionBitMask = ColliderType.Object.rawValue
+        
+        self.addChild(pipe2)
+    }
+    
+    func didBegin(_ contact: SKPhysicsContact) {
+       
+        print("Есть контакт")
+        self.speed = 0
+        gameOver = true
+        print("Конец игры")
+    }
     
     override func didMove(to view: SKView) {
+        self.physicsWorld.contactDelegate = self
         
-        // Get label node from scene and store it for use later
-        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        if let label = self.label {
-            label.alpha = 0.0
-            label.run(SKAction.fadeIn(withDuration: 2.0))
-        }
+        _ = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(makePipes), userInfo: nil, repeats: true)
         
-        // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
+        let bgTexture = SKTexture(imageNamed: "bg")
+        let moveBGAnimation = SKAction.move(by: CGVector (dx: -bgTexture.size().width, dy: 0 ), duration: 5)
+        let shiftBGAnimation = SKAction.move(by: CGVector(dx: bgTexture.size().width, dy: 0 ), duration: 0)
         
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 2.5
+        let moveBGForever = SKAction.repeatForever(SKAction.sequence([moveBGAnimation,shiftBGAnimation]))
+        
+        var i:CGFloat = 0
+        
+        while i < 3 {
             
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
-            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                              SKAction.fadeOut(withDuration: 0.5),
-                                              SKAction.removeFromParent()]))
+            bg = SKSpriteNode(texture: bgTexture)
+            bg.position = CGPoint(x: bgTexture.size().width * i, y: self.frame.midY)
+            
+            bg.size.height = self.frame.height
+            bg.run(moveBGForever)
+            bg.zPosition = -1
+            self.addChild(bg)
+            i += 1
+            
         }
-    }
-    
-    
-    func touchDown(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.green
-            self.addChild(n)
-        }
-    }
-    
-    func touchMoved(toPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.blue
-            self.addChild(n)
-        }
-    }
-    
-    func touchUp(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.red
-            self.addChild(n)
-        }
+        
+        
+        let astraBoyTexture = SKTexture(imageNamed: "astraboy")
+        let astraBoyTexture2 = SKTexture(imageNamed: "astraboy")
+        let animation = SKAction.animate(with: [astraBoyTexture,astraBoyTexture2], timePerFrame: 0.1)
+        let makeAstraboyFly = SKAction.repeatForever(animation)
+        
+        astraboy = SKSpriteNode(texture: astraBoyTexture)
+        astraboy.position = CGPoint(x: -50, y: self.frame.midY)
+        
+        astraboy.run(makeAstraboyFly)
+        
+      
+        astraboy.physicsBody = SKPhysicsBody(circleOfRadius: astraBoyTexture.size().height / 2)
+        astraboy.physicsBody!.isDynamic = false
+        
+        astraboy.physicsBody!.contactTestBitMask = ColliderType.Object.rawValue
+        astraboy.physicsBody!.categoryBitMask = ColliderType.Astraboy.rawValue
+        astraboy.physicsBody!.collisionBitMask = ColliderType.Astraboy.rawValue
+        
+        
+        self.addChild(astraboy)
+        
+        let ground = SKNode()
+        
+        ground.position = CGPoint(x: self.frame.midX, y: -self.frame.height / 2)
+        
+        ground.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: self.frame.width, height: 1))
+        
+        ground.physicsBody!.isDynamic = false
+        
+        ground.physicsBody!.contactTestBitMask = ColliderType.Object.rawValue
+        ground.physicsBody!.categoryBitMask = ColliderType.Object.rawValue
+        ground.physicsBody!.collisionBitMask = ColliderType.Object.rawValue
+        
+        self.addChild(ground)
+        
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
+        
+        if gameOver == false {
+            
+            astraboy.physicsBody!.isDynamic = true
+//        let astraBoyTexture = SKTexture(imageNamed: "astraboy")
+//        astraboy.physicsBody = SKPhysicsBody(circleOfRadius: astraBoyTexture.size().height / 2)
+        //Смещение объекта по оси x/y
+            astraboy.physicsBody!.velocity = CGVector(dx: 1, dy: -1)
+            astraboy.physicsBody!.applyImpulse(CGVector(dx: 0, dy: 60))
+            
         }
         
-        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
-    }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
-    }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
-    }
-    
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
     }
     
     
     override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
+        
+        
     }
+    
+    
 }
