@@ -15,6 +15,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var score = 0
     
     var scoreLabel = SKLabelNode()
+    var resultLabel = SKLabelNode()
     var gameOverLabel = SKLabelNode()
     var gameOverLabel2 = SKLabelNode()
     
@@ -89,46 +90,45 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func didBegin(_ contact: SKPhysicsContact) {
         
         if gameOver == false {
-        
-        if contact.bodyA.categoryBitMask == ColliderType.Gap.rawValue || contact.bodyB.categoryBitMask == ColliderType.Gap.rawValue{
-            print("Зачет одно очко!")
-            score += 1
             
-            scoreLabel.text = String(score)
-            
-            
-            if scoreLabel.text == "10" || scoreLabel.text == "20"{
+            if contact.bodyA.categoryBitMask == ColliderType.Gap.rawValue || contact.bodyB.categoryBitMask == ColliderType.Gap.rawValue{
+                print("Зачет одно очко!")
+                score += 100
                 
-//                scoreLabel.fontColor = UIColor.purple
-//                scoreLabel.fontSize = 55
-                scoreLabel.text = "Молодчина!"
+                scoreLabel.text = String(score) + "р."
+                
+                if scoreLabel.text == "1000р." || scoreLabel.text == "2000р."{
+                    
+                    //                scoreLabel.fontColor = UIColor.purple
+                    //                scoreLabel.fontSize = 55
+                    scoreLabel.text = "Молодчина!"
+                    
+                    
+                }
                 
                 
             }
-            
-            
-        }
-            
-            
-            
-        else{
-            self.speed = 0
-            gameOver = true
-            timer.invalidate()
-            gameOverLabel.fontName = "Helvetica"
-            gameOverLabel.fontColor = UIColor.purple
-            gameOverLabel2.fontName = "Helvetica"
-            gameOverLabel2.fontColor = UIColor.purple
-            gameOverLabel.fontSize = 40
-            gameOverLabel2.fontSize = 20
-            gameOverLabel.text = "Конец игры!"
-            gameOverLabel2.text = "Нажми для продолжения"
-            gameOverLabel.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
-            gameOverLabel2.position = CGPoint(x: self.frame.midX, y: self.frame.height / 2 - 150)
-            self.addChild(gameOverLabel)
-            self.addChild(gameOverLabel2)
-            
-            
+                
+                
+                
+            else{
+                self.speed = 0
+                gameOver = true
+                timer.invalidate()
+                gameOverLabel.fontName = "Helvetica"
+                gameOverLabel.fontColor = UIColor.purple
+                gameOverLabel2.fontName = "Helvetica"
+                gameOverLabel2.fontColor = UIColor.purple
+                gameOverLabel.fontSize = 40
+                gameOverLabel2.fontSize = 20
+                gameOverLabel.text = "Конец игры!"
+                gameOverLabel2.text = "Нажми для продолжения"
+                gameOverLabel.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
+                gameOverLabel2.position = CGPoint(x: self.frame.midX, y: self.frame.height / 2 - 150)
+                self.addChild(gameOverLabel)
+                self.addChild(gameOverLabel2)
+                
+                
             }
             
         }
@@ -171,7 +171,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         
         let astraBoyTexture = SKTexture(imageNamed: "astraboy")
-        let astraBoyTexture2 = SKTexture(imageNamed: "astraboy")
+        let astraBoyTexture2 = SKTexture(imageNamed: "astraboy1")
         let animation = SKAction.animate(with: [astraBoyTexture,astraBoyTexture2], timePerFrame: 0.1)
         let makeAstraboyFly = SKAction.repeatForever(animation)
         
@@ -207,19 +207,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         scoreLabel.fontName = "Helvetica"
         scoreLabel.fontSize = 50
-        scoreLabel.text = "0"
-        scoreLabel.position = CGPoint(x: self.frame.midX, y: self.frame.height / 2 - 70)
+        scoreLabel.text = "0р."
+        scoreLabel.position = CGPoint(x: self.frame.midX, y: self.frame.height / 2 - 120)
+        
+        resultLabel.fontName = "Helvetica"
+        resultLabel.fontSize = 30
+        resultLabel.text = "Вы заработали"
+        resultLabel.position = CGPoint(x: self.frame.midX, y: self.frame.height / 2 - 70)
         
         self.addChild(scoreLabel)
+        self.addChild(resultLabel)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         
         if gameOver == false {
-            
             astraboy.physicsBody!.isDynamic = true
-            //        let astraBoyTexture = SKTexture(imageNamed: "astraboy")
-            //        astraboy.physicsBody = SKPhysicsBody(circleOfRadius: astraBoyTexture.size().height / 2)
             //Смещение объекта по оси x/y
             astraboy.physicsBody!.velocity = CGVector(dx: 1, dy: -1)
             //Уровень сложности - смещение по оси y

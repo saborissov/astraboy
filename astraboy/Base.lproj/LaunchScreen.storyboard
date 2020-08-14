@@ -15,16 +15,16 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="astraboy" translatesAutoresizingMaskIntoConstraints="NO" id="E9u-Z3-j7K">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="astra_origin" translatesAutoresizingMaskIntoConstraints="NO" id="xm4-dq-DJu">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="E9u-Z3-j7K" secondAttribute="trailing" id="F3c-Ke-0XQ"/>
-                            <constraint firstItem="E9u-Z3-j7K" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="jXL-9j-qgT"/>
-                            <constraint firstItem="E9u-Z3-j7K" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="oYJ-Kd-8BK"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="E9u-Z3-j7K" secondAttribute="bottom" id="vqV-JV-e2L"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="xm4-dq-DJu" secondAttribute="bottom" id="5be-PC-iCc"/>
+                            <constraint firstItem="xm4-dq-DJu" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="oY1-Jo-Ta8"/>
+                            <constraint firstItem="xm4-dq-DJu" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="tiW-Fe-c6z"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="xm4-dq-DJu" secondAttribute="trailing" id="xBK-KP-zGW"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
@@ -35,6 +35,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="astraboy" width="244" height="183"/>
+        <image name="astra_origin" width="344" height="195"/>
     </resources>
 </document>
